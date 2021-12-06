@@ -23,6 +23,7 @@ package types
 import (
 	"fmt"
 	"io"
+	"math/big"
 	"unsafe"
 
 	"github.com/klaytn/klaytn/common"
@@ -80,27 +81,33 @@ const (
 	ReceiptStatusErrNotSupported                         = uint(0x1d)
 	ReceiptStatusErrInvalidCodeFormat                    = uint(0x1e)
 	ReceiptStatusLast                                    = uint(0x1f) // Last value which is not an actual ReceiptStatus
-//	ReceiptStatusErrInvalidJumpDestination   // TODO-Klaytn-Issue615
-//	ReceiptStatusErrInvalidOpcode            // Default case, because no static message available
-//	ReceiptStatusErrStackUnderflow           // Default case, because no static message available
-//	ReceiptStatusErrStackOverflow            // Default case, because no static message available
-//	ReceiptStatusErrInsufficientBalance      // No receipt available for this error
-//	ReceiptStatusErrTotalTimeLimitReached    // No receipt available for this error
-//	ReceiptStatusErrGasUintOverflow          // TODO-Klaytn-Issue615
+	//	ReceiptStatusErrInvalidJumpDestination   // TODO-Klaytn-Issue615
+	//	ReceiptStatusErrInvalidOpcode            // Default case, because no static message available
+	//	ReceiptStatusErrStackUnderflow           // Default case, because no static message available
+	//	ReceiptStatusErrStackOverflow            // Default case, because no static message available
+	//	ReceiptStatusErrInsufficientBalance      // No receipt available for this error
+	//	ReceiptStatusErrTotalTimeLimitReached    // No receipt available for this error
+	//	ReceiptStatusErrGasUintOverflow          // TODO-Klaytn-Issue615
 
 )
 
 // Receipt represents the results of a transaction.
 type Receipt struct {
 	// Consensus fields
-	Status uint   `json:"status"`
-	Bloom  Bloom  `json:"logsBloom"         gencodec:"required"`
-	Logs   []*Log `json:"logs"              gencodec:"required"`
+	PostState []byte `json:"root"`
+	Status    uint   `json:"status"`
+	// Klaytn: the same value with gasUsed field can be filled in.
+	CumulativeGasUsed uint64 `json:"gasUsed"           gencodec:"required"`
+	Bloom             Bloom  `json:"logsBloom"         gencodec:"required"`
+	Logs              []*Log `json:"logs"              gencodec:"required"`
 
 	// Implementation fields (don't reorder!)
-	TxHash          common.Hash    `json:"transactionHash" gencodec:"required"`
-	ContractAddress common.Address `json:"contractAddress"`
-	GasUsed         uint64         `json:"gasUsed" gencodec:"required"`
+	TxHash           common.Hash    `json:"transactionHash" gencodec:"required"`
+	ContractAddress  common.Address `json:"contractAddress"`
+	GasUsed          uint64         `json:"gasUsed" gencodec:"required"`
+	BlockHash        common.Hash    `json:"blockHash,omitempty"`
+	BlockNumber      *big.Int       `json:"blockNumber,omitempty"`
+	TransactionIndex uint           `json:"transactionIndex"`
 }
 
 type receiptMarshaling struct {
